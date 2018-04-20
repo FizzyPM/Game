@@ -28,6 +28,34 @@ function love.load()
 end
 
 function love.update(dt)
+	if gamestate=='play' then
+		if ball:collides(player1) then
+			ball.dx = -ball.dx * 1.3
+			ball.x=player1.x+5
+			if ball.dy>0 then
+				ball.dy = math.random(10,150)
+			else
+				ball.dy = -math.random(10,150)
+			end
+		end
+		if ball:collides(player2) then
+			ball.dx = -ball.dx * 1.3
+			ball.x=player2.x-4
+			if ball.dy>0 then
+				ball.dy = math.random(10,150)
+			else
+				ball.dy = -math.random(10,150)
+			end
+		end
+		if ball.y<=0 then
+			ball.y = 0
+			ball.dy = - ball.dy
+		end
+		if ball.y>=VirtualH-4 then
+			ball.y=VirtualH-4
+			ball.dy = - ball.dy
+		end
+	end
 	--player1
 	if love.keyboard.isDown('w') then
 		player1.dy= -PaddleSpeed
