@@ -13,6 +13,7 @@ function love.load()
 	love.window.setTitle('Pong')
 	math.randomseed(os.time())
 	smallfont = love.graphics.newFont('font.ttf',8)
+	largefont = love.graphics.newFont('font.ttf',16)
 	scorefont = love.graphics.newFont('font.ttf',32)
 	love.graphics.setFont(smallfont)
 	push:setupScreen(VirtualW,VirtualH,WinWidth,WinHeight,{
@@ -54,6 +55,26 @@ function love.update(dt)
 		if ball.y>=VirtualH-4 then
 			ball.y=VirtualH-4
 			ball.dy = - ball.dy
+		end
+		if ball.x < 0 then
+		 	score2=score2+1
+		 	if score2==10 then
+		 		winner=2
+		 		gamestate='done'
+		 	else
+		 		gamestate='start'
+		 		ball:reset()
+		 	end
+		end
+		if ball.x > VirtualW then
+		 	score1=score1+1
+		 	if score1==10 then
+		 		winner=1
+		 		gamestate='done'
+		 	else
+		 		gamestate='start'
+		 		ball:reset()
+		 	end
 		end
 	end
 	--player1
@@ -99,8 +120,11 @@ function love.draw()
 	love.graphics.setFont(smallfont)
 	if gamestate=='start' then
 		love.graphics.printf('Hello Start State!',0,20,VirtualW,'center')
-	else
+	elseif gamestate=='play' then
 		love.graphics.printf('Hello Play State!',0,20,VirtualW,'center')
+	else
+		love.graphics.setFont(largefont)
+		love.graphics.printf('Winner is Player ' .. tostring(winner),0,20,VirtualW,'center')
 	end
 	love.graphics.setFont(scorefont)
 	love.graphics.print(tostring(score1), VirtualW/2-50,VirtualH/3)
