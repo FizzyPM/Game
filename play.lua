@@ -6,7 +6,7 @@ WinHeight =720
 WinWidth =1280
 VirtualH=243
 VirtualW=432
-PaddleSpeed=200
+PaddleSpeed=260
 
 function love.load()
 	love.graphics.setDefaultFilter('nearest','nearest')
@@ -16,8 +16,13 @@ function love.load()
 	largefont = love.graphics.newFont('font.ttf',16)
 	scorefont = love.graphics.newFont('font.ttf',32)
 	love.graphics.setFont(smallfont)
+	 sound = {
+        ['paddle_hit'] = love.audio.newSource('sounds/paddle_hit.wav', 'static'),
+        ['score'] = love.audio.newSource('sounds/score.wav', 'static'),
+        ['wall_hit'] = love.audio.newSource('sounds/wall_hit.wav', 'static')
+    }
 	push:setupScreen(VirtualW,VirtualH,WinWidth,WinHeight,{
-		fullscreen=false,resizable=false,vsync=true})
+		fullscreen=false,resizable=true,vsync=true})
 	score1=0
 	score2=0
 
@@ -28,36 +33,45 @@ function love.load()
 	gamestate='start'
 end
 
+function love.resize(w, h)
+    push:resize(w, h)
+end
+
 function love.update(dt)
 	if gamestate=='play' then
 		if ball:collides(player1) then
-			ball.dx = -ball.dx * 1.3
+			ball.dx = -ball.dx * 1.2
 			ball.x=player1.x+5
 			if ball.dy>0 then
 				ball.dy = math.random(10,150)
 			else
 				ball.dy = -math.random(10,150)
 			end
+			sound['paddle_hit']:play()
 		end
 		if ball:collides(player2) then
-			ball.dx = -ball.dx * 1.3
+			ball.dx = -ball.dx * 1.2
 			ball.x=player2.x-4
 			if ball.dy>0 then
 				ball.dy = math.random(10,150)
 			else
 				ball.dy = -math.random(10,150)
 			end
+			sound['paddle_hit']:play()
 		end
 		if ball.y<=0 then
 			ball.y = 0
 			ball.dy = - ball.dy
+			sound['wall_hit']:play()
 		end
 		if ball.y>=VirtualH-4 then
 			ball.y=VirtualH-4
 			ball.dy = - ball.dy
+			sound['wall_hit']:play()
 		end
 		if ball.x < 0 then
 		 	score2=score2+1
+		 	sound['score']:play()
 		 	if score2==10 then
 		 		winner=2
 		 		gamestate='done'
@@ -68,6 +82,7 @@ function love.update(dt)
 		end
 		if ball.x > VirtualW then
 		 	score1=score1+1
+		 	sound['score']:play()
 		 	if score1==10 then
 		 		winner=1
 		 		gamestate='done'
@@ -107,6 +122,11 @@ function love.keypressed(k)
 	elseif k=='enter' or k=='return' then
 		if gamestate=='start' then
 			gamestate='play'
+		elseif gamestate=='done' then
+			score1=0
+			score2=0
+			gamestate='start'
+			ball:reset()
 		else
 			gamestate='start'
 			ball:reset()
