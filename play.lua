@@ -1,4 +1,7 @@
 push = require 'push'
+Class = require 'class'
+require 'Paddle'
+require 'Ball'
 WinHeight =720
 WinWidth =1280
 VirtualH=243
@@ -16,35 +19,36 @@ function love.load()
 	score1=0
 	score2=0
 
-	player1y=30
-	player2y=VirtualH-50
+	player1 = Paddle(10, 30, 5, 20)
+    player2 = Paddle(VirtualW - 10, VirtualH - 30, 5, 20)
+	ball=Ball(VirtualW/2-2,VirtualH/2-2,4,4)
 
-	ballx= VirtualW/2-2
-	bally= VirtualH/2-2
-	balldx= math.random(2) == 1 and 100 or -100 	-- if ==1 then 100 else -100						
-	balldy= math.random(-50, 50)
 	gamestate='start'
-
 end
 
 function love.update(dt)
 	--player1
 	if love.keyboard.isDown('w') then
-		player1y=math.max(0,player1y+ -PaddleSpeed *dt)
+		player1.dy= -PaddleSpeed
 	elseif love.keyboard.isDown('s') then
-		player1y=math.min(VirtualH-20,player1y+ PaddleSpeed*dt)
+		player1.dy= PaddleSpeed
+	else
+		player1.dy=0
 	end
 	--player2
 	if love.keyboard.isDown('up') then
-		player2y=math.max(0,player2y+ -PaddleSpeed *dt)
+		player2.dy= -PaddleSpeed
 	elseif love.keyboard.isDown('down') then
-		player2y=math.min(VirtualH-20,player2y+ PaddleSpeed*dt)
+		player2.dy= PaddleSpeed
+	else 
+		player2.dy=0
 	end
 	--ball
 	if gamestate=='play' then
-		ballx=ballx+balldx*dt
-		bally=bally+balldy*dt
+		ball:update(dt)
 	end
+	player1:update(dt)
+	player2:update(dt)
 end
 
 function love.keypressed(k)
@@ -55,10 +59,7 @@ function love.keypressed(k)
 			gamestate='play'
 		else
 			gamestate='start'
-			ballx= VirtualW/2-2
-			bally= VirtualH/2-2
-			balldx= math.random(2) == 1 and 100 or -100 	-- if ==1 then 100 else -100						
-			balldy= math.random(-50, 50)*1.5
+			ball:reset()
 		end
 	end
 end
@@ -75,8 +76,8 @@ function love.draw()
 	love.graphics.setFont(scorefont)
 	love.graphics.print(tostring(score1), VirtualW/2-50,VirtualH/3)
     love.graphics.print(tostring(score2), VirtualW/2+30,VirtualH/3)
-	love.graphics.rectangle('fill', 10, player1y, 5,20)
-	love.graphics.rectangle('fill', VirtualW-10,player2y, 5,20)
-	love.graphics.rectangle('fill',ballx,bally,4,4)
+	player1:render()
+	player2:render()
+	ball:render()
 	push:apply('end')
 end
